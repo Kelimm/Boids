@@ -1,6 +1,6 @@
 # 🐟 Boids — Simulation de Banc de Poissons
 
-![Aperçu de la simulation](misc/Enregistrement%202026-08-03%20183639.mp4)
+![Aperçu de la simulation](misc/Enregistrement%202026-08-03%20183639.gif)
 
 Cette simulation repose sur l'algorithme des **Boids** (*Craig Reynolds, 1986*). Chaque agent (poisson) ajuste sa trajectoire selon des règles locales simples, faisant émerger un comportement collectif complexe au sein d'un espace 2D de $1600 \times 1200$ pixels.
 
