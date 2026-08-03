@@ -2,72 +2,41 @@
 
 ![Aperçu de la simulation](misc/Enregistrement%202026-08-03%20183639.gif)
 
-Cette simulation repose sur l'algorithme des **Boids** (*Craig Reynolds, 1986*). Chaque agent (poisson) ajuste sa trajectoire selon des règles locales simples, faisant émerger un comportement collectif complexe au sein d'un espace 2D de $1600 \times 1200$ pixels.
+Ce projet propose une simulation du comportements d'un banc poissons, développée à l'aide de la bibliothèque Pygame. Chaque individu ajuste son déplacement en temps réel afin de naviguer de manière fluide dans son environnement tout en interagissant avec ses congénères.
 
 ---
 
-## 📐 Modélisation Mathématique
+## ⚙️ Principe de l'Algorithme
 
-### 1. Intégration Temporelle
-Pour garantir l'indépendance de la simulation vis-à-vis du taux de rafraîchissement (FPS), le déplacement est calculé via un schéma d'Euler explicite :
+Le déplacement de chaque poisson est régi par des règles simples de cinématique et d'interaction de voisinage. Chaque poisson est défini par sa position $P = (x, y)$, son vecteur vitesse $\vec{v}$, et un angle d'orientation $\theta$.
 
-$$\mathbf{p}(t + \Delta t) = \mathbf{p}(t) + \mathbf{v}(t) \cdot \Delta t$$
+Le mouvement se décompose en deux forces principales :
 
-où $\mathbf{p} = (x, y)^T$ est la position, $\mathbf{v} = (v_x, v_y)^T$ le vecteur vitesse et $\Delta t = \frac{\text{tick}}{1000}$ le temps écoulé en secondes.
+1. 🎯 **L'attraction vers une cible** : Chaque poisson se dirige vers une coordonnée cible $T = (x_{target}, y_{target})$ qui lui est propre. Dès qu'un poisson s'approche suffisamment de sa cible, une nouvelle destination est définie aléatoirement sur la carte.
+2. 🔄 **L'alignement avec le voisinage** : C'est le premier principe de comportement de groupe. Chaque poisson scrute son environnement dans un rayon d'interaction $R$. Il calcule le vecteur vitesse moyen $\vec{v}_{\mathrm{moyen}}$ de tous les voisins situés dans cette zone :
 
-### 2. Optimisation des Distances
-Afin d'éviter le coût calculatoire de la racine carrée $\sqrt{x}$, la proximité entre deux poissons $i$ et $j$ est évaluée via la distance euclidienne au carré :
+$$
+\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}
+$$
 
-$$d^2(i, j) = (x_j - x_i)^2 + (y_j - y_i)^2$$
+Le poisson applique ensuite une force de correction pour harmoniser sa propre direction avec celle du groupe.
 
-Un poisson $j$ appartient au voisinage $\mathcal{N}_i$ du poisson $i$ si $d^2(i, j) \le R_{\text{align}}^2$ (avec $R_{\text{align}} = 100\text{ px}$).
-
-### 3. Orientation et Transformation
-La géométrie locale du poisson est orientée selon son vecteur vitesse :
-
-$$\theta = \arctan2(v_y, v_x)$$
-
-Chaque sommet local $\mathbf{p}_{\text{local}}$ subit une rotation 2D puis une translation vers la position absolue sur l'écran :
-
-$$\mathbf{p}_{\text{écran}} = \begin{pmatrix} \cos\theta & -\sin\theta \\ \sin\theta & \cos\theta \end{pmatrix} \mathbf{p}_{\text{local}} + \mathbf{p}$$
-
-### 4. Force d'Attraction vers la Cible (*Seeking*)
-Chaque poisson vise une cible dynamique $\mathbf{c} = (x_{\text{target}}, y_{\text{target}})^T$. Le vecteur direction unitaire $\hat{\mathbf{u}}_{\text{target}}$ et la force associée s'écrivent :
-
-$$\hat{\mathbf{u}}_{\text{target}} = \frac{\mathbf{c} - \mathbf{p}}{\|\mathbf{c} - \mathbf{p}\|}$$
-
-$$\mathbf{F}_{\text{target}} = \hat{\mathbf{u}}_{\text{target}} \cdot k_{\text{target}} \cdot \|\mathbf{v}\|$$
-
-### 5. Règle d'Alignement Local
-Chaque poisson adapte sa vitesse à la vitesse moyenne de son voisinage $\mathcal{N}_i$ ($N = |\mathcal{N}_i|$) :
-
-$$\bar{\mathbf{v}} = \frac{1}{N} \sum_{j \in \mathcal{N}_i} \mathbf{v}_j$$
-
-La force de correction d'alignement (*steering*) est déterminée par un contrôle proportionnel :
-
-$$\mathbf{F}_{\text{align}} = \alpha \cdot (\bar{\mathbf{v}} - \mathbf{v}_i) \quad \text{avec } \alpha = 0.05$$
-
-### 6. Superposition et Borne de Vitesse (*Clamping*)
-Le nouveau vecteur vitesse résulte de la somme vectorielle des forces :
-
-$$\mathbf{v}' = \mathbf{v} + \mathbf{F}_{\text{align}} + \mathbf{F}_{\text{target}}$$
-
-Sa norme est contrainte dans l'intervalle $[v_{\min}, v_{\max}] = [50, 300]\text{ px/s}$ tout en conservant sa direction :
-
-$$\mathbf{v}_{\text{final}} = \begin{cases} 
-v_{\max} \cdot \dfrac{\mathbf{v}'}{\|\mathbf{v}'\|} & \text{si } \|\mathbf{v}'\| > v_{\max} \\[10pt]
-v_{\min} \cdot \dfrac{\mathbf{v}'}{\|\mathbf{v}'\|} & \text{si } \|\mathbf{v}'\| < v_{\min} \\[10pt]
-\mathbf{v}' & \text{sinon}
-\end{cases}$$
+Les vitesses minimale $s_{min}$ et maximale $s_{max}$ sont encadrées à chaque étape temporelle $\Delta t$ afin de garantir la stabilité visuelle de la simulation.
 
 ---
 
-## 🚀 Perspectives : Complétion du Modèle de Reynolds
+## 🎨 Représentation Visuelle
 
-L'implémentation actuelle repose sur l'**alignement** et la poursuite d'une cible individuelle. Pour obtenir un modèle complet de boids, deux règles clés seront intégrées prochainement :
+Chaque poisson est modélisé par un polygone orienté selon son angle de déplacement $\theta$. Pour faciliter l'observation et le débogage de la simulation, deux zones d'influence sont dessinées autour de chaque individu :
 
-1. **Séparation (Répulsion localisée) :** Force répulsive inversement proportionnelle à la distance pour éviter les chevauchements et collisions entre poissons proches :
-   $$\mathbf{F}_{\text{sepa}} = \sum_{j \in \mathcal{N}_{\text{proche}}} \frac{\mathbf{p}_i - \mathbf{p}_j}{\|\mathbf{p}_i - \mathbf{p}_j\|^2}$$
+* 🟢 **Le cercle vert de rayon $R = 100$** : Représente la limite de perception sensorielle du poisson. C'est à l'intérieur de cette zone que les voisins sont pris en compte pour calculer l'alignement.
+* ⚪ **Le cercle blanc de rayon $r = 15$** : Représente la zone de sécurité immédiate. Si un autre poisson pénètre dans ce cercle, le poisson change de couleur et devient rouge, signalant graphiquement une situation de collision.
 
-2. **Cohésion (Attraction vers le centre de masse) :** Force d'attraction dirigée vers le barycentre $\mathbf{g}_i$ des voisins pour maintenir la cohérence du groupe sans cible artificielle :
-   $$\mathbf{g}_i = \frac{1}{N} \sum_{j \in \mathcal{N}_i} \mathbf{p}_j \implies \mathbf{F}_{\text{cohes}} = \beta \cdot (\mathbf{g}_i - \mathbf{p}_i)$$
+---
+
+## 🚀 Perspectives d'Évolution
+
+Afin d'obtenir une simulation de groupe plus complète et réaliste, le modèle actuel (qui repose uniquement sur l'alignement et la recherche de cible) est conçu pour intégrer prochainement les deux autres forces :
+
+* 🛡️ **La Séparation** : Ajout d'une force répulsive active. Lorsque le cercle de collision blanc ($r = 15$) est violé, le poisson appliquera une force opposée à la direction du voisin trop proche pour s'en écarter et éviter les superpositions.
+* 🤝 **La Cohésion** : Ajout d'une force attractive vers le centre de masse du groupe. Le poisson calculera la position moyenne de ses voisins dans le cercle vert ($R = 100$) et cherchera à s'en rapprocher, évitant ainsi que les individus ne s'isolent de manière isolée.
