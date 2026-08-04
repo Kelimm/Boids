@@ -1,6 +1,6 @@
 # 🐟 Boids — Simulation de Banc de Poissons
 
-![Aperçu de la simulation](misc/simulation.gif)
+![Aperçu de la simulation](./simulation.gif)
 
 Ce projet est une simulation émergente du comportement d'un banc de poissons, développée avec **Python** et **Pygame**. Le programme implémente l'algorithme des "Boids", où des comportements globaux complexes (comme la formation d'un banc) émergent de règles locales simples appliquées à chaque individu.
 
