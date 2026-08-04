@@ -16,6 +16,7 @@ Pour éviter que les poissons ne se chevauchent, une force de répulsion est app
 
 ### 2. 🔄 L'Alignement
 Le poisson observe les poissons dans son rayon de perception et ajuste sa direction pour s'aligner sur la vitesse moyenne du groupe :
+
 $$\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}$$
 *   **Effet :** Crée un mouvement coordonné et fluide dans une même direction.
 
