@@ -1,6 +1,6 @@
 # 🐟 Boids — Simulation de Banc de Poissons
 
-![Aperçu de la simulation](misc/Enregistrement%202026-08-04%200650.gif)
+![Aperçu de la simulation](misc/simulation.gif)
 
 Ce projet est une simulation émergente du comportement d'un banc de poissons, développée avec **Python** et **Pygame**. Le programme implémente l'algorithme des "Boids", où des comportements globaux complexes (comme la formation d'un banc) émergent de règles locales simples appliquées à chaque individu.
 
@@ -10,20 +10,20 @@ Ce projet est une simulation émergente du comportement d'un banc de poissons, d
 
 Le mouvement de chaque poisson est le résultat de la somme de quatre forces vectorielles. À chaque image, le poisson analyse son voisinage pour ajuster sa trajectoire.
 
-### 1. 🛡️ La Séparation (Avoidance)
+### 1. 🛡️ La Séparation
 Pour éviter que les poissons ne se chevauchent, une force de répulsion est appliquée. Si un voisin pénètre dans le **rayon de collision**, le poisson calcule un vecteur s'éloignant de celui-ci.
 *   **Effet :** Maintient une distance minimale entre les individus.
 
-### 2. 🔄 L'Alignement (Alignment)
+### 2. 🔄 L'Alignement
 Le poisson observe les poissons dans son rayon de perception et ajuste sa direction pour s'aligner sur la vitesse moyenne du groupe :
 $$\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}$$
 *   **Effet :** Crée un mouvement coordonné et fluide dans une même direction.
 
-### 3. 🤝 La Cohésion (Cohesion)
+### 3. 🤝 La Cohésion
 Le poisson est attiré par le "centre de masse" de ses voisins. Il calcule la position moyenne des individus proches et dirige son mouvement vers ce point.
 *   **Effet :** Empêche les individus de s'éparpiller et force la formation de groupes compacts.
 
-### 4. 🎯 L'Exploration (Targeting)
+### 4. 🎯 L'Exploration
 Chaque poisson possède une cible aléatoire dans l'espace. Une fois la cible atteinte (ou après un certain temps), une nouvelle destination est générée.
 *   **Effet :** Apporte du dynamisme et évite que le banc ne reste statique ou ne tourne en cercle indéfiniment.
 
