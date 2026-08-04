@@ -1,42 +1,51 @@
 # 🐟 Boids — Simulation de Banc de Poissons
 
-![Aperçu de la simulation](misc/Enregistrement%202026-08-03%20183639.gif)
+![Aperçu de la simulation](misc/Enregistrement%202026-08-04%200650.gif)
 
-Ce projet propose une simulation du comportements d'un banc poissons, développée à l'aide de la bibliothèque Pygame. Chaque individu ajuste son déplacement en temps réel afin de naviguer de manière fluide dans son environnement tout en interagissant avec ses congénères.
+Ce projet est une simulation émergente du comportement d'un banc de poissons, développée avec **Python** et **Pygame**. Le programme implémente l'algorithme des "Boids", où des comportements globaux complexes (comme la formation d'un banc) émergent de règles locales simples appliquées à chaque individu.
 
 ---
 
 ## ⚙️ Principe de l'Algorithme
 
-Le déplacement de chaque poisson est régi par des règles simples de cinématique et d'interaction de voisinage. Chaque poisson est défini par sa position $P = (x, y)$, son vecteur vitesse $\vec{v}$, et un angle d'orientation $\theta$.
+Le mouvement de chaque poisson est le résultat de la somme de quatre forces vectorielles. À chaque image, le poisson analyse son voisinage pour ajuster sa trajectoire.
 
-Le mouvement se décompose en deux forces principales :
+### 1. 🛡️ La Séparation (Avoidance)
+Pour éviter que les poissons ne se chevauchent, une force de répulsion est appliquée. Si un voisin pénètre dans le **rayon de collision**, le poisson calcule un vecteur s'éloignant de celui-ci.
+*   **Effet :** Maintient une distance minimale entre les individus.
 
-1. 🎯 **L'attraction vers une cible** : Chaque poisson se dirige vers une coordonnée cible $T = (x_{target}, y_{target})$ qui lui est propre. Dès qu'un poisson s'approche suffisamment de sa cible, une nouvelle destination est définie aléatoirement sur la carte.
-2. 🔄 **L'alignement avec le voisinage** : C'est le premier principe de comportement de groupe. Chaque poisson scrute son environnement dans un rayon d'interaction $R$. Il calcule le vecteur vitesse moyen $\vec{v}_{\mathrm{moyen}}$ de tous les voisins situés dans cette zone :
+### 2. 🔄 L'Alignement (Alignment)
+Le poisson observe les poissons dans son rayon de perception et ajuste sa direction pour s'aligner sur la vitesse moyenne du groupe :
+$$\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}$$
+*   **Effet :** Crée un mouvement coordonné et fluide dans une même direction.
 
-$$
-\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}
-$$
+### 3. 🤝 La Cohésion (Cohesion)
+Le poisson est attiré par le "centre de masse" de ses voisins. Il calcule la position moyenne des individus proches et dirige son mouvement vers ce point.
+*   **Effet :** Empêche les individus de s'éparpiller et force la formation de groupes compacts.
 
-Le poisson applique ensuite une force de correction pour harmoniser sa propre direction avec celle du groupe.
-
-Les vitesses minimale $s_{min}$ et maximale $s_{max}$ sont encadrées à chaque étape temporelle $\Delta t$ afin de garantir la stabilité visuelle de la simulation.
-
----
-
-## 🎨 Représentation Visuelle
-
-Chaque poisson est modélisé par un polygone orienté selon son angle de déplacement $\theta$. Pour faciliter l'observation et le débogage de la simulation, deux zones d'influence sont dessinées autour de chaque individu :
-
-* 🟢 **Le cercle vert de rayon $R = 100$** : Représente la limite de perception sensorielle du poisson. C'est à l'intérieur de cette zone que les voisins sont pris en compte pour calculer l'alignement.
-* ⚪ **Le cercle blanc de rayon $r = 15$** : Représente la zone de sécurité immédiate. Si un autre poisson pénètre dans ce cercle, le poisson change de couleur et devient rouge, signalant graphiquement une situation de collision.
+### 4. 🎯 L'Exploration (Targeting)
+Chaque poisson possède une cible aléatoire dans l'espace. Une fois la cible atteinte (ou après un certain temps), une nouvelle destination est générée.
+*   **Effet :** Apporte du dynamisme et évite que le banc ne reste statique ou ne tourne en cercle indéfiniment.
 
 ---
 
-## 🚀 Perspectives d'Évolution
+## 🛠️ Détails Techniques
 
-Afin d'obtenir une simulation de groupe plus complète et réaliste, le modèle actuel (qui repose uniquement sur l'alignement et la recherche de cible) est conçu pour intégrer prochainement les deux autres forces :
+### Gestion des Bordures
+Pour maintenir les poissons à l'intérieur de la fenêtre, un système de **force de rappel** est utilisé. Lorsqu'un poisson approche des limites de l'écran, une force opposée est appliquée à son vecteur vitesse pour le rediriger vers le centre.
 
-* 🛡️ **La Séparation** : Ajout d'une force répulsive active. Lorsque le cercle de collision blanc ($r = 15$) est violé, le poisson appliquera une force opposée à la direction du voisin trop proche pour s'en écarter et éviter les superpositions.
-* 🤝 **La Cohésion** : Ajout d'une force attractive vers le centre de masse du groupe. Le poisson calculera la position moyenne de ses voisins dans le cercle vert ($R = 100$) et cherchera à s'en rapprocher, évitant ainsi que les individus ne s'isolent de manière isolée.
+### Contrôle de la Vitesse
+Pour garantir la stabilité visuelle, la norme du vecteur vitesse est bridée :
+*   **Vitesse Max ($s_{max}$)** : Évite que les poissons ne "téléportent" à cause de forces trop cumulées.
+*   **Vitesse Min ($s_{min}$)** : Garantit que les poissons restent toujours en mouvement.
+
+### Représentation Visuelle
+*   **Corps** : Un polygone dont l'angle est calculé via `atan2(vy, vx)`.
+*   **Feedback visuel** : Les poissons virent au **rouge** lorsqu'une collision est détectée, illustrant l'activation de la force de séparation.
+
+---
+
+## 📈 Évolutions Possibles
+- [ ] **Optimisation** : Cette version à du mal a formé un unique banc a partir de 300 individus
+- [ ] **Prédateurs** : Ajouter une entité "prédateur" qui déclenche une force de fuite massive chez les boids.
+- [ ] **Obstacles** : Ajouter des zones infranchissables pour tester la capacité d'évitement du groupe.
