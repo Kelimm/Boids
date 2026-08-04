@@ -2,7 +2,7 @@
 
 ![Aperçu de la simulation](./simulation.gif)
 
-Ce projet est une simulation émergente du comportement d'un banc de poissons, développée avec **Python** et **Pygame**. Le programme implémente l'algorithme des "Boids", où des comportements globaux complexes (comme la formation d'un banc) émergent de règles locales simples appliquées à chaque individu.
+Ce projet est une simulation du comportement d'un banc de poissons, développée avec **Python** et **Pygame**. Le programme implémente l'algorithme des "Boids", où des comportements globaux complexes (comme la formation d'un banc) émergent de règles locales simples appliquées à chaque individu.
 
 ---
 
@@ -18,6 +18,7 @@ Pour éviter que les poissons ne se chevauchent, une force de répulsion est app
 Le poisson observe les poissons dans son rayon de perception et ajuste sa direction pour s'aligner sur la vitesse moyenne du groupe :
 
 $$\vec{v}_{\mathrm{moyen}} = \frac{1}{N} \sum_{i=1}^{N} \vec{v}_{\mathrm{voisin}, i}$$
+
 *   **Effet :** Crée un mouvement coordonné et fluide dans une même direction.
 
 ### 3. 🤝 La Cohésion
@@ -41,7 +42,6 @@ Pour garantir la stabilité visuelle, la norme du vecteur vitesse est bridée :
 *   **Vitesse Min ($s_{min}$)** : Garantit que les poissons restent toujours en mouvement.
 
 ### Représentation Visuelle
-*   **Corps** : Un polygone dont l'angle est calculé via `atan2(vy, vx)`.
 *   **Feedback visuel** : Les poissons virent au **rouge** lorsqu'une collision est détectée, illustrant l'activation de la force de séparation.
 
 ---
